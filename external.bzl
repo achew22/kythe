@@ -618,6 +618,13 @@ def _go_dependencies():
     )
 
     maybe(
+        go_repository,
+        name = "com_github_google_codesearch",
+        commit = "a45d81b686e85d01f2838439deaf72126ccd5a96",
+        importpath = "github.com/google/codesearch",
+    )
+
+    maybe(
         http_archive,
         name = "org_brotli_go",
         sha256 = "fb511e09ea284fcd18fe2a2632744609a77f69c345428b9f0d2cc15171215f06",
