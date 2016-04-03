@@ -1,0 +1,63 @@
+////
+Copyright 2016 Google Inc. All rights reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+////
+
+Kythe-CS
+========
+
+This directory contains Kythe-CS, a web-based cross-referencing code search
+user interface built on Kythe extractors and indexers. It allows users to
+search a corpus of code using regular expressions and follow cross references
+between references, definitions, derived classes and virtual overrides.
+
+A live instance of Kythe-CS is available at http://llvm-cs.pcc.me.uk/.
+This service serves a continuously updated (every 24 hours) index of
+link:http://llvm.org/[LLVM] and various LLVM subprojects.
+
+The following shell snippets show how to use provided shell scripts
+to run the entire Kythe-CS indexing pipeline. These scripts will also
+start a local HTTP server that serves the generated index on port
+8080. The scripts are intended for local experimentation purposes
+only; we plan to make available tools to make it easier to run a
+production service. Before running these scripts, you will first need to
+link:https://www.kythe.io/contributing#building-source-code[build Kythe].
+
+For CMake projects:
+[source,shell]
+----
+cd /path/to/project
+mkdir gen
+cd gen
+cmake -G Ninja ..
+ninja  # Build any generated source files.
+/path/to/kythe/cs/scripts/serve_compdb.sh .. < compile_commands.json
+----
+
+For autotools projects, using https://github.com/rizsotto/Bear[bear]:
+[source,shell]
+----
+cd /path/to/project
+mkdir gen
+cd gen
+../configure
+bear make
+/path/to/kythe/cs/scripts/serve_compdb.sh .. < compile_commands.json
+----
+
+Or just a collection of source files:
+[source,shell]
+----
+args=-std=c++11 /path/to/kythe/cs/scripts/serve_cmdline.sh input1.cc input2.cc
+----
