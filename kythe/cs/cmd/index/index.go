@@ -545,15 +545,16 @@ type srcinfo struct {
 
 func (srci *srcinfo) dump(name string, strs *StrTab) {
 	for _, xr := range srci.xrefs {
-		fmt.Printf("%s:%d:%d def @ %s:%d:%d ", name, xr.startByte, xr.endByte, xr.info.def.Path.get(strs), xr.info.def.StartByte, xr.info.def.EndByte)
+		fmt.Printf("%s:%d:%d def @ %s:%d:%d\n", name, xr.startByte, xr.endByte, xr.info.def.Path.get(strs), xr.info.def.StartByte, xr.info.def.EndByte)
 		dumpLocList := func(name string, locs []Loc) {
 			if len(locs) == 0 {
 				return
 			}
-			fmt.Printf("%s @", name)
+			fmt.Printf("  %s @", name)
 			for _, r := range locs {
 				fmt.Printf(" %s:%d:%d", r.Path.get(strs), r.StartByte, r.EndByte)
 			}
+			fmt.Println("")
 		}
 		dumpLocList("decls", xr.info.decls)
 		dumpLocList("refs", xr.info.refs)
