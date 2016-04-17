@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-// Source files typically contain many definitions. If we used one file per
-// cross reference page, we could quickly run out of inodes, especially in
-// resource constrained production environments. This package defines a simple
-// file format that stores all cross reference pages for a given source file.
+// Package refpack defines a simple file format that stores all cross reference
+// pages for a given source file. Because source files typically contain many
+// definitions, if we used one file per cross reference page, we could quickly
+// run out of inodes, especially in resource constrained production
+// environments.
 package refpack
 
 import (
@@ -33,14 +34,15 @@ type key struct {
 	startByte, endByte uint32
 }
 
-// An io.Writer that can be used to assemble entries for the refpack.
+// A Writer is an io.Writer that can be used to assemble entries for the
+// refpack.
 type Writer struct {
 	bytes.Buffer
 	keys []key
 }
 
-// Specify the name of a new entry to write to the refpack. This function must
-// be called before writing content to the refpack.
+// NewName is called to specify the name of a new entry to write to the refpack.
+// This function must be called before writing content to the refpack.
 func (w *Writer) NewName(name string) {
 	if len(w.keys) != 0 {
 		w.keys[len(w.keys)-1].endByte = uint32(w.Len())
@@ -60,7 +62,7 @@ func (b byName) Swap(i, j int) {
 	b[i], b[j] = b[j], b[i]
 }
 
-// Write the entire refpack to the given io.Writer.
+// WriteTo writes the entire refpack to the given io.Writer.
 func (w *Writer) WriteTo(fw io.Writer) {
 	if len(w.keys) != 0 {
 		w.keys[len(w.keys)-1].endByte = uint32(w.Len())
@@ -98,14 +100,14 @@ func (w *Writer) WriteTo(fw io.Writer) {
 	fw.Write(w.Bytes())
 }
 
-// An io.ReadSeeker that can be used to read entries from a refpack.
+// A Reader is an io.ReadSeeker that can be used to read entries from a refpack.
 type Reader struct {
 	io.ReadSeeker
 	keyslen uint32
 	header  []byte
 }
 
-// Create a Reader from an io.ReadSeeker; typically an open os.File
+// NewReader creates a Reader from an io.ReadSeeker, typically an open os.File
 // for a refpack.
 func NewReader(fr io.ReadSeeker) (Reader, error) {
 	header := make([]byte, 8)
@@ -129,8 +131,8 @@ func NewReader(fr io.ReadSeeker) (Reader, error) {
 	return Reader{fr, keyslen, fullheader}, nil
 }
 
-// Seeks the io.ReadSeeker to the start of the entry with the given name, and
-// returns its size. If the entry was not found, returns (-1, nil).
+// SeekToName seeks the io.ReadSeeker to the start of the entry with the given
+// name, and returns its size. If the entry was not found, returns (-1, nil).
 func (r *Reader) SeekToName(name string) (int, error) {
 	namebytes := []byte(name)
 	strsoffset := 12*r.keyslen + 4

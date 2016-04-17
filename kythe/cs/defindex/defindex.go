@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
-// This package defines the data structures for definition records, which are
-// used to prioritize search results corresponding to definitions.
+// Package defindex defines the data structures for definition records, which
+// are used to prioritize search results corresponding to definitions.
 package defindex
 
 import (
 	"fmt"
 )
 
-// A definition record.
+// A Definition is a definition record.
 type Definition struct {
 	// The full name of the entity, as it may be written in the source code.
 	// This is in lower case in order to simplify case insensitive matching.
@@ -37,8 +37,8 @@ type Definition struct {
 	StartByte, EndByte uint32
 }
 
-// A file record. File records also control which files are added to the full-text
-// search index.
+// A File is a file record. File records also control which files are added to
+// the full-text search index.
 type File struct {
 	// The name of the file, both in original case and in lower case in
 	// order to simplify case insensitive matching.
@@ -48,10 +48,10 @@ type File struct {
 	Defs []Definition
 }
 
-// A definition index is just a list of files.
+// An Index is just a list of files.
 type Index []File
 
-// Dump the defindex to stdout.
+// Dump dumps the defindex to stdout.
 func (ix Index) Dump() {
 	for _, f := range ix {
 		for _, d := range f.Defs {

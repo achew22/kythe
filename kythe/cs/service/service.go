@@ -37,7 +37,7 @@ import (
 	"kythe.io/kythe/cs/refpack"
 )
 
-// A loaded corpus index.
+// An Index is a loaded corpus index.
 type Index struct {
 	indexdir string
 	idx      *index.Index
@@ -70,7 +70,7 @@ func (ix *Index) init() error {
 	return nil
 }
 
-// Returns the name of the directory from which the index was loaded.
+// Dir returns the name of the directory from which the index was loaded.
 func (ix *Index) Dir() string {
 	return ix.indexdir
 }
@@ -171,12 +171,12 @@ fileloop:
 	return textmatches, nil
 }
 
-// An http.Handler that serves a given corpus index.
+// A Service is an http.Handler that serves a given corpus index.
 type Service struct {
 	ix *Index
 }
 
-// Sets the corpus index served by this Service to ix.
+// SetIndex sets the corpus index served by this Service to ix.
 func (s *Service) SetIndex(ix *Index) {
 	atomic.StorePointer((*unsafe.Pointer)(unsafe.Pointer(&s.ix)), unsafe.Pointer(ix))
 }
@@ -296,7 +296,7 @@ func (s *Service) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.serveSearchResults(ix, w, r.URL.Path[1:])
 }
 
-// Loads a corpus index from the given directory and returns it.
+// LoadIndex loads a corpus index from the given directory and returns it.
 func LoadIndex(path string) (*Index, error) {
 	var ix Index
 	ix.indexdir = path

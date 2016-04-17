@@ -57,16 +57,16 @@ import (
 	"kythe.io/kythe/cs/refpack"
 )
 
-// A string table. This is used to create a mapping from semantic node names
-// to unique integers (StrIndices). This helps reduce memory consumption,
-// especially during the corpus phase, as we only need to store one semantic
-// node name per semantic node.
+// A StrTab is a string table. This is used to create a mapping from semantic
+// node names to unique integers (StrIndices). This helps reduce memory
+// consumption, especially during the corpus phase, as we only need to store one
+// semantic node name per semantic node.
 type StrTab struct {
 	m    map[string]StrIndex
 	Strs []string
 }
 
-// An index into the string table.
+// A StrIndex is an index into the string table.
 type StrIndex int32
 
 func (strs *StrTab) idx(str string) StrIndex {
@@ -90,13 +90,13 @@ func (i StrIndex) get(strs *StrTab) string {
 	return strs.Strs[i]
 }
 
-// A source location.
+// A Loc is a source location.
 type Loc struct {
 	Path               StrIndex
 	StartByte, EndByte int32
 }
 
-// Information collected from a semantic node.
+// LocNode holds information collected from a semantic node.
 type LocNode struct {
 	// The node's source location.
 	L Loc
@@ -114,23 +114,23 @@ type LocNode struct {
 	NoUnref bool
 }
 
-// What type of relation this is.
+// RelKind specifies what type of relation this is.
 type RelKind bool
 
-// Src derives from Dst.
+// RelKindDerives means Src derives from Dst.
 const RelKindDerives RelKind = false
 
-// Src is a virtual override of Dst.
+// RelKindOverrides means Src is a virtual override of Dst.
 const RelKindOverrides RelKind = true
 
-// A relation between two semantic nodes.
+// Rel is a relation between two semantic nodes.
 type Rel struct {
 	Kind     RelKind
 	Src, Dst StrIndex
 }
 
-// A TU index. This data structure is serialized and transferred from the TU
-// phase to the corpus phase.
+// A TUInfo is a TU index. This data structure is serialized and transferred from
+// the TU phase to the corpus phase.
 type TUInfo struct {
 	Incs, Refs, Defs, Comps []LocNode
 	Rels                    []Rel
