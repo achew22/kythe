@@ -704,7 +704,7 @@ func (ix *corpusindex) finish(dump bool) {
 			src.toUpdate = append(src.toUpdate, dst.overriders)
 
 		case RelKindDerives:
-			if dst.overriders == nil {
+			if dst.derivers == nil {
 				dst.derivers = new([]Loc)
 			}
 			src.toUpdate = append(src.toUpdate, dst.derivers)

@@ -6,6 +6,11 @@ cs_test(
 )
 
 cs_test(
+  name = "derived_classes",
+  src = "derived_classes.cc",
+)
+
+cs_test(
   name = "directory_navigation",
   src = "directory_navigation.cc",
 )
