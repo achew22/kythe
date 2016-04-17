@@ -14,6 +14,20 @@
  * limitations under the License.
  */
 
+// This program implements Kythe-CS's indexer. It operates in two phases:
+//
+// 1) a "tu" phase, which takes a series of entry protobufs from a single
+//    translation unit and converts them into a TU index, a more compact
+//    representation that contains only the information required to produce the
+//    serving corpus.
+//
+// 2) a "corpus" phase, in which we take all the TU indices produced during
+//    the tu phase and produce a serving corpus. A serving corpus is a directory
+//    containing HTML files that can be served directly by the "serve" program,
+//    together with search indices.
+//
+// These phases are orchestrated by user shell scripts;
+// see e.g. scripts/serve_compdb.sh.
 package main
 
 import (
@@ -43,11 +57,16 @@ import (
 	"kythe.io/kythe/cs/refpack"
 )
 
+// A string table. This is used to create a mapping from semantic node names
+// to unique integers (StrIndices). This helps reduce memory consumption,
+// especially during the corpus phase, as we only need to store one semantic
+// node name per semantic node.
 type StrTab struct {
 	m    map[string]StrIndex
 	Strs []string
 }
 
+// An index into the string table.
 type StrIndex int32
 
 func (strs *StrTab) idx(str string) StrIndex {
@@ -71,28 +90,47 @@ func (i StrIndex) get(strs *StrTab) string {
 	return strs.Strs[i]
 }
 
+// A source location.
 type Loc struct {
 	Path               StrIndex
 	StartByte, EndByte int32
 }
 
+// Information collected from a semantic node.
 type LocNode struct {
-	L       Loc
-	Name    StrIndex
-	VN      StrIndex
+	// The node's source location.
+	L Loc
+
+	// The node's name, as a user may write it in the source code.
+	Name StrIndex
+
+	// The semantic node vname, which is formed by joining its five fields
+	// with a null byte as the delimiter.
+	VN StrIndex
+
+	// Whether to not highlight this node as unreferenced; this is intended
+	// for things like parameters of non-defining declarations, which cannot
+	// be mentioned in the source code.
 	NoUnref bool
 }
 
+// What type of relation this is.
 type RelKind bool
 
+// Src derives from Dst.
 const RelKindDerives RelKind = false
+
+// Src is a virtual override of Dst.
 const RelKindOverrides RelKind = true
 
+// A relation between two semantic nodes.
 type Rel struct {
 	Kind     RelKind
 	Src, Dst StrIndex
 }
 
+// A TU index. This data structure is serialized and transferred from the TU
+// phase to the corpus phase.
 type TUInfo struct {
 	Incs, Refs, Defs, Comps []LocNode
 	Rels                    []Rel
@@ -236,20 +274,20 @@ func (info *TUInfo) dedup() {
 	dedupRelList(&info.Rels)
 }
 
-func (i *TUInfo) dump() {
-	for _, r := range i.Incs {
-		fmt.Printf("inc %s:%d:%d : %s\n", r.L.Path.get(&i.Strs), r.L.StartByte, r.L.EndByte, r.VN.get(&i.Strs))
+func (info *TUInfo) dump() {
+	for _, r := range info.Incs {
+		fmt.Printf("inc %s:%d:%d : %s\n", r.L.Path.get(&info.Strs), r.L.StartByte, r.L.EndByte, r.VN.get(&info.Strs))
 	}
-	for _, r := range i.Refs {
-		fmt.Printf("ref %s:%d:%d : %#v\n", r.L.Path.get(&i.Strs), r.L.StartByte, r.L.EndByte, r.VN.get(&i.Strs))
+	for _, r := range info.Refs {
+		fmt.Printf("ref %s:%d:%d : %#v\n", r.L.Path.get(&info.Strs), r.L.StartByte, r.L.EndByte, r.VN.get(&info.Strs))
 	}
-	for _, r := range i.Defs {
-		fmt.Printf("def %s:%d:%d (%s): %#v\n", r.L.Path.get(&i.Strs), r.L.StartByte, r.L.EndByte, r.Name.get(&i.Strs), r.VN.get(&i.Strs))
+	for _, r := range info.Defs {
+		fmt.Printf("def %s:%d:%d (%s): %#v\n", r.L.Path.get(&info.Strs), r.L.StartByte, r.L.EndByte, r.Name.get(&info.Strs), r.VN.get(&info.Strs))
 	}
-	for _, r := range i.Comps {
-		fmt.Printf("comp %s:%d:%d (%s): %#v\n", r.L.Path.get(&i.Strs), r.L.StartByte, r.L.EndByte, r.Name.get(&i.Strs), r.VN.get(&i.Strs))
+	for _, r := range info.Comps {
+		fmt.Printf("comp %s:%d:%d (%s): %#v\n", r.L.Path.get(&info.Strs), r.L.StartByte, r.L.EndByte, r.Name.get(&info.Strs), r.VN.get(&info.Strs))
 	}
-	for _, r := range i.Rels {
+	for _, r := range info.Rels {
 		var kind string
 		switch r.Kind {
 		case RelKindOverrides:
@@ -257,7 +295,7 @@ func (i *TUInfo) dump() {
 		case RelKindDerives:
 			kind = "derives"
 		}
-		fmt.Printf("%s %#v -> %#v\n", kind, r.Src.get(&i.Strs), r.Dst.get(&i.Strs))
+		fmt.Printf("%s %#v -> %#v\n", kind, r.Src.get(&info.Strs), r.Dst.get(&info.Strs))
 	}
 }
 
@@ -352,10 +390,10 @@ func asLanguageName(qname string) string {
 	if strings.ContainsRune(qname, '#') { // operator overloading
 		return ""
 	}
-	qname_parts := strings.Split(qname, ":")
+	qnameParts := strings.Split(qname, ":")
 	result := ""
-	for i := len(qname_parts); i != 0; i-- {
-		p := qname_parts[i-1]
+	for i := len(qnameParts); i != 0; i-- {
+		p := qnameParts[i-1]
 		if len(p) == 0 || (p[0] >= '0' && p[0] <= '9') {
 			return ""
 		}

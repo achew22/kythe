@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// HTTP server that uses the kythe.io/kythe/cs/service package to serve a corpus
+// index.
 package main
 
 import (

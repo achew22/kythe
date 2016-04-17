@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+// Common utilities for producing HTML that are shared between the index and
+// serve programs.
 package cshtml
 
 import (
@@ -22,6 +24,7 @@ import (
 	"io"
 )
 
+// Write the standard page header to w.
 func WriteHeader(w io.Writer, title, q string) {
 	fmt.Fprintf(w, `<!DOCTYPE html>
 <html>
@@ -50,16 +53,25 @@ func WriteHeader(w io.Writer, title, q string) {
 </table>`, html.EscapeString(title), html.EscapeString(q))
 }
 
+// Write the standard page footer to w.
 func WriteFooter(w io.Writer) {
 	fmt.Fprintln(w, `</body>
 </html>`)
 }
 
+// Precomputed information about a source file.
 type SrcData struct {
-	Src       []byte
+	// The content of the source file.
+	Src []byte
+
+	// An array whose length is the number of lines in the file.
+	// LineTable[i] contains the byte offset of the start of line i+1.
+	// This allows us to binary search for the line number corresponding to
+	// a byte offset (see SrcData.LineNumber).
 	LineTable []int32
 }
 
+// Make a SrcData for src.
 func MakeSrcData(src []byte) SrcData {
 	if len(src) == 0 {
 		return SrcData{src, []int32{0}}
@@ -84,6 +96,8 @@ func MakeSrcData(src []byte) SrcData {
 	return SrcData{src, linetable}
 }
 
+// Compute the line number for the given byte offset; O(log N) in the number of
+// lines.
 func (srcd *SrcData) LineNumber(byteOffset int32) int {
 	min := 0
 	max := len(srcd.LineTable) - 1
@@ -99,6 +113,10 @@ func (srcd *SrcData) LineNumber(byteOffset int32) int {
 	return min + 1
 }
 
+// Write an HTML snippet showing the line(s) covering the byte offsets
+// [startByte, endByte) in srcd, linked to the full source file, which is
+// assumed to be at path path. contextLines is the number of lines of context
+// (on both sides) to include around the given location.
 func WriteSnippet(w io.Writer, path string, srcd SrcData, startByte, endByte, contextLines int) {
 	if startByte >= len(srcd.Src) {
 		return

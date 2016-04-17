@@ -14,6 +14,11 @@
  * limitations under the License.
  */
 
+// Test harness for the kythe.io/kythe/cs/service package. This program loads
+// an index from the directory named as its first command line argument and
+// reads test commands from the file named as its second argument. Test commands
+// cause the test harness to "navigate" between pages of the UI and verify that
+// content is as expected. Test cases are in the ../../testdata directory.
 package main
 
 import (
@@ -67,14 +72,12 @@ func (w *mockWriter) links() ([]link, error) {
 	getLinkText = func(n *html.Node) string {
 		if n.Type == html.TextNode {
 			return n.Data
-		} else {
-			var t string
-			for c := n.FirstChild; c != nil; c = c.NextSibling {
-				t += getLinkText(c)
-			}
-			return t
 		}
-
+		var t string
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			t += getLinkText(c)
+		}
+		return t
 	}
 	var links []link
 	var findLinks func(*html.Node)
@@ -106,18 +109,18 @@ type testHarness struct {
 }
 
 func (h *testHarness) navigate(rawurl string) error {
-	newUrl, err := url.Parse(rawurl)
+	newURL, err := url.Parse(rawurl)
 	if err != nil {
 		return err
 	}
 	if len(h.history) == 0 {
-		if !newUrl.IsAbs() {
+		if !newURL.IsAbs() {
 			return errors.New("first url should be absolute")
 		}
 	} else {
-		newUrl = h.history[len(h.history)-1].ResolveReference(newUrl)
+		newURL = h.history[len(h.history)-1].ResolveReference(newURL)
 	}
-	h.history = append(h.history, newUrl)
+	h.history = append(h.history, newURL)
 	h.requestPage()
 	return nil
 }
@@ -191,9 +194,9 @@ func (h *testHarness) run(r io.Reader, path string) {
 			}
 		}
 		if strings.HasPrefix(line, "// url: ") {
-			expectedUrl := line[8:]
-			if expectedUrl != h.Location().String() {
-				log.Fatalf("%s:%d: error: expected url %s, got %s", path, lineno, expectedUrl, h.Location().String())
+			expectedURL := line[8:]
+			if expectedURL != h.Location().String() {
+				log.Fatalf("%s:%d: error: expected url %s, got %s", path, lineno, expectedURL, h.Location().String())
 			}
 		}
 		if line == "// print" {
