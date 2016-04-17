@@ -15,7 +15,7 @@ mkdir -p $1/out $1/tus
 
 set +x
 for i in $1/kindex/*.kindex ; do
-  echo "$bin/kythe/cxx/indexer/cxx/indexer $i | $bin/llvmcs/cmd/index/index tu $1/out > $1/tus/`basename $i`.tu"
+  echo "$bin/kythe/cxx/indexer/cxx/indexer $i | $bin/kythe/cs/cmd/index/index tu $1/out > $1/tus/`basename $i`.tu"
 done | parallel --gnu -v
 set -x
 
