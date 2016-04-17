@@ -36,6 +36,11 @@ cs_test(
 )
 
 cs_test(
+  name = "template_outline",
+  src = "template_outline.cc",
+)
+
+cs_test(
   name = "variable",
   src = "variable.cc",
 )

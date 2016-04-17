@@ -712,52 +712,63 @@ func (ix *corpusindex) finish(dump bool) {
 
 	dumpXrefmap("after defs/refs")
 
-	type compXreflist struct {
+	type defXreflist struct {
 		qname                           StrIndex
 		refs, defs                      []Loc
 		derivers, overrides, overriders []*[]Loc
 		nounref                         bool
 	}
 
-	compmap := make(map[Loc]*compXreflist)
+	type defmapEntry struct {
+		isCanonical bool
+		*defXreflist
+	}
+
+	defmap := make(map[Loc]defmapEntry)
 	mergeComp := func(loc Loc, name StrIndex, xr *xreflist) {
-		comps, ok := compmap[loc]
+		entry, ok := defmap[loc]
 		if !ok {
-			comps = new(compXreflist)
-			comps.qname = name
-			compmap[loc] = comps
+			entry = defmapEntry{true, new(defXreflist)}
+			entry.qname = name
+			defmap[loc] = entry
 		}
-		comps.refs = append(comps.refs, xr.refs...)
-		comps.defs = append(comps.defs, xr.defs...)
+		for _, d := range xr.defs {
+			_, ok := defmap[d]
+			if !ok {
+				defmap[d] = defmapEntry{false, entry.defXreflist}
+			}
+		}
+		entry.refs = append(entry.refs, xr.refs...)
+		entry.defs = append(entry.defs, xr.defs...)
 		if xr.derivers != nil {
-			comps.derivers = append(comps.derivers, xr.derivers)
+			entry.derivers = append(entry.derivers, xr.derivers)
 		}
 		if xr.overrides != nil {
-			comps.overrides = append(comps.overrides, xr.overrides)
+			entry.overrides = append(entry.overrides, xr.overrides)
 		}
 		if xr.overriders != nil {
-			comps.overriders = append(comps.overriders, xr.overriders)
+			entry.overriders = append(entry.overriders, xr.overriders)
 		}
 		for _, l := range xr.toUpdate {
 			*l = append(*l, loc)
 		}
 		xr.toUpdate = nil
 		if xr.nounref {
-			comps.nounref = true
+			entry.nounref = true
 		}
 	}
-	dumpCompmap := func(when string) {
+	dumpDefmap := func(when string) {
 		if !dump {
 			return
 		}
-		fmt.Printf("compmap (%s):\n", when)
-		for loc, xrl := range compmap {
-			fmt.Printf("%s:%d:%d (%s): r(", loc.Path.get(&ix.info.Strs), loc.StartByte, loc.EndByte, xrl.qname.get(&ix.info.Strs))
-			for _, r := range xrl.refs {
+		fmt.Printf("defmap (%s):\n", when)
+		for loc, entry := range defmap {
+			fmt.Printf("%s:%d:%d (%s, %#v): r(", loc.Path.get(&ix.info.Strs), loc.StartByte, loc.EndByte, entry.qname.get(&ix.info.Strs), entry.isCanonical)
+			for _, r := range entry.refs {
 				fmt.Printf(" %s:%d:%d", r.Path.get(&ix.info.Strs), r.StartByte, r.EndByte)
 			}
 			fmt.Printf(" ) d(")
-			for _, r := range xrl.defs {
+			for _, r := range entry.defs {
 				fmt.Printf(" %s:%d:%d", r.Path.get(&ix.info.Strs), r.StartByte, r.EndByte)
 			}
 			fmt.Printf(" )\n")
@@ -775,7 +786,7 @@ func (ix *corpusindex) finish(dump bool) {
 	}
 	ix.info.Comps = nil
 
-	dumpCompmap("after comps")
+	dumpDefmap("after comps")
 	dumpXrefmap("after comps")
 
 	for _, xr := range xrefmap {
@@ -788,18 +799,21 @@ func (ix *corpusindex) finish(dump bool) {
 	}
 	xrefmap = nil
 
-	dumpCompmap("after xrefs")
+	dumpDefmap("after xrefs")
 
-	for def, refs := range compmap {
+	for def, entry := range defmap {
+		if !entry.isCanonical {
+			continue
+		}
 		ds := ix.srcinfoFor(def.Path)
-		xri := &xrefinfo{def: def, qname: refs.qname.get(&ix.info.Strs), decls: refs.defs, refs: refs.refs, nounref: refs.nounref}
+		xri := &xrefinfo{def: def, qname: entry.qname.get(&ix.info.Strs), decls: entry.defs, refs: entry.refs, nounref: entry.nounref}
 
 		for _, rel := range [...]struct {
 			target *[]Loc
 			src    []*[]Loc
-		}{{&xri.derivers, refs.derivers},
-			{&xri.overrides, refs.overrides},
-			{&xri.overriders, refs.overriders}} {
+		}{{&xri.derivers, entry.derivers},
+			{&xri.overrides, entry.overrides},
+			{&xri.overriders, entry.overriders}} {
 			for _, s := range rel.src {
 				*rel.target = append(*rel.target, *s...)
 			}
@@ -807,7 +821,7 @@ func (ix *corpusindex) finish(dump bool) {
 
 		ds.xrefs = append(ds.xrefs, xref{startByte: def.StartByte, endByte: def.EndByte, info: xri})
 
-		for _, r := range append(refs.defs, refs.refs...) {
+		for _, r := range append(entry.defs, entry.refs...) {
 			s := ix.srcinfoFor(r.Path)
 			s.xrefs = append(s.xrefs, xref{startByte: r.StartByte, endByte: r.EndByte, info: xri})
 		}
