@@ -26,6 +26,11 @@ cs_test(
 )
 
 cs_test(
+  name = "for_range",
+  src = "for_range.cc",
+)
+
+cs_test(
   name = "function",
   src = "function.cc",
 )
