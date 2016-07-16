@@ -200,7 +200,7 @@ func (s *Service) serveSearchResults(ix *Index, w http.ResponseWriter, pat strin
 
 func (s *Service) serveDirectoryListing(ix *Index, w http.ResponseWriter, r *http.Request) {
 	dir := r.URL.Path
-	if dir[len(dir)-1] != '/' {
+	if dir == "" || dir[len(dir)-1] != '/' {
 		http.Redirect(w, r, dir+"/", http.StatusFound)
 		return
 	}
