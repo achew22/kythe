@@ -386,7 +386,11 @@ func (ix *tuindex) addLocNode(path string, xrefs *[]tulocnode, entry *spb.Entry)
 }
 
 func asLanguageName(qname string) string {
-	qname = qname[:strings.LastIndex(qname, "#")]
+	hashindex := strings.LastIndex(qname, "#")
+	if hashindex == -1 {
+		return ""
+	}
+	qname = qname[:hashindex]
 	if strings.ContainsRune(qname, '#') { // operator overloading
 		return ""
 	}
