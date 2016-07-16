@@ -38,7 +38,7 @@ func WriteHeader(w io.Writer, title, q string) {
 <tr>
 <td style="width: 75%%; text-align: center;">
 <form action="/">
-<input type="text" name="q" value="%s" size="50">
+<input type="text" name="q" id="searchbox" value="%s" size="50">
 <input type="submit" value="Search">
 </form>
 </td>

@@ -1241,6 +1241,20 @@ function init() {
 		refgroups[j].onmouseover = highlightRefgroup;
 		refgroups[j].onmouseout = unhighlightRefgroup;
 	}
+
+	var searchbox = document.getElementById('searchbox');
+	document.addEventListener("keypress", function(e) {
+		if (e.charCode == '/'.charCodeAt(0)) {
+			searchbox.focus();
+			e.preventDefault();
+		}
+	});
+	searchbox.addEventListener("keyup", function(e) {
+		if (e.keyCode == 27 /* esc */) {
+			this.blur();
+			e.preventDefault();
+		}
+	});
 }
 `)
 	if err != nil {
