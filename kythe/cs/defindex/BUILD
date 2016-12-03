@@ -1,7 +1,10 @@
 package(default_visibility = ["//visibility:public"])
 
-load("/third_party/go/build", "gopath_package")
+load("//tools:build_rules/go.bzl", "go_package_library")
 
 licenses(["notice"])
 
-gopath_package()
+go_package_library(
+    name = "defindex",
+    srcs = ["defindex.go"],
+)

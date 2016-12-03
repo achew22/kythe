@@ -1,4 +1,4 @@
-load("/tools/build_rules/go", "go_binary")
+load("@io_bazel_rules_go//go:def.bzl", "go_binary")
 
 package(default_visibility = ["//kythe:default_visibility"])
 
@@ -9,6 +9,6 @@ go_binary(
     ],
     deps = [
         "//kythe/cs/service",
-	"//third_party/go/src/golang.org/x/net/html",
+	"@go_x_net//:html",
     ]
 )

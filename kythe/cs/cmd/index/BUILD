@@ -1,4 +1,4 @@
-load("/tools/build_rules/go", "go_binary")
+load("@io_bazel_rules_go//go:def.bzl", "go_binary")
 
 package(default_visibility = ["//kythe:default_visibility"])
 
@@ -13,6 +13,6 @@ go_binary(
         "//kythe/cs/refpack",
         "//kythe/go/platform/delimited",
         "//kythe/proto:storage_proto_go",
-        "//third_party/go/src/github.com/google/codesearch/index",
+        "@go_codesearch//:index",
     ],
 )
