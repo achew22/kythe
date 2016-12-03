@@ -1244,7 +1244,7 @@ function init() {
 
 	var searchbox = document.getElementById('searchbox');
 	document.addEventListener("keypress", function(e) {
-		if (e.charCode == '/'.charCodeAt(0)) {
+		if (e.charCode == '/'.charCodeAt(0) && document.activeElement != searchbox) {
 			searchbox.focus();
 			e.preventDefault();
 		}
