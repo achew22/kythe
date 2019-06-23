@@ -1134,8 +1134,26 @@ func (ix *corpusindex) writeAnnotatedSourcePage(w io.Writer, refw *refpack.Write
 
 func (ix *corpusindex) writeStatics() {
 	err := writeStaticFile(ix.outdir+"/res/style.css", `
+html {
+	--text-color: rgb(32, 33, 36);
+	--bg-color: white;
+	--refgroup-color: yellow;
+	--highlighted-line: #e0e0e0;
+}
+
 body {
 	font-family: sans-serif;
+	color: var(--text-color);
+	background-color: var(--bg-color);
+}
+
+@media(prefers-color-scheme:dark) {
+	html {
+		--text-color: rgb(232, 234, 237);
+		--bg-color: rgb(50,54,57);
+		--refgroup-color: #3700b3;
+		--highlighted-line: #101010;
+	}
 }
 
 a {
@@ -1143,8 +1161,16 @@ a {
 	text-decoration: none;
 }
 
+.refgroup {
+	background-color: var(--refgroup-color);
+}
+
 .lines {
 	color: #808080;
+}
+
+.highlighted-line {
+	background-color: var(--highlighted-line);
 }
 
 .code a {
@@ -1165,7 +1191,7 @@ a {
 }
 
 .mref {
-	border-bottom: 1px dashed black;
+	border-bottom: 1px dashed var(--text-color);
 }
 `)
 	if err != nil {
@@ -1204,32 +1230,20 @@ function highlightLine() {
 	}
 
 	if (curHighlightedLine != 0) {
-		kids[lineNodeStart + lineNodeAlignment * (curHighlightedLine - 1)].style.backgroundColor = "";
+		kids[lineNodeStart + lineNodeAlignment * (curHighlightedLine - 1)].classList.add("highlighted-line");
 	}
-	kids[lineNodeStart + lineNodeAlignment * (line - 1)].style.backgroundColor = "#e0e0e0";
+	kids[lineNodeStart + lineNodeAlignment * (line - 1)].classList.remove("highlighted-line");
 	curHighlightedLine = line;
 }
 
-function setRefgroupColor(elem, color) {
-	var index = elem.className.indexOf(' ');
-	var refgroupClass;
-	if (index == -1) {
-		refgroupClass = elem.className;
-	} else {
-		refgroupClass = elem.className.substring(0, index);
-	}
-	var refgroup = document.getElementsByClassName(refgroupClass);
-	for (var i = 0; i != refgroup.length; i++) {
-		refgroup[i].style.backgroundColor = color;
-	}
-}
-
 function highlightRefgroup() {
-	setRefgroupColor(this, "yellow");
+	var refgroup = document.getElementsByClassName(this.classList[0]);
+	refgroup.forEach(function(elt) { elt.classList.add("refgroup"); })
 }
 
 function unhighlightRefgroup() {
-	setRefgroupColor(this, "");
+	var refgroup = document.getElementsByClassName(this.classList[0]);
+	refgroup.forEach(function(elt) { elt.classList.remove("refgroup"); })
 }
 
 function init() {
