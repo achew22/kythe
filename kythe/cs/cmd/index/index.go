@@ -1238,12 +1238,16 @@ function highlightLine() {
 
 function highlightRefgroup() {
 	var refgroup = document.getElementsByClassName(this.classList[0]);
-	refgroup.forEach(function(elt) { elt.classList.add("refgroup"); })
+	for (var i = 0; i != refgroup.length; i++) {
+		refgroup[i].classList.add("refgroup");
+	}
 }
 
 function unhighlightRefgroup() {
 	var refgroup = document.getElementsByClassName(this.classList[0]);
-	refgroup.forEach(function(elt) { elt.classList.remove("refgroup"); })
+	for (var i = 0; i != refgroup.length; i++) {
+		refgroup[i].classList.remove("refgroup");
+	}
 }
 
 function init() {
