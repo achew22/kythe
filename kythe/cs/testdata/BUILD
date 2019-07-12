@@ -1,56 +1,56 @@
-load("cs_test", "cs_test")
+load(":cs_test.bzl", "cs_test")
 
 cs_test(
-  name = "class",
-  src = "class.cc",
+    name = "class",
+    src = "class.cc",
 )
 
 cs_test(
-  name = "derived_classes",
-  src = "derived_classes.cc",
+    name = "derived_classes",
+    src = "derived_classes.cc",
 )
 
 cs_test(
-  name = "directory_navigation",
-  src = "directory_navigation.cc",
+    name = "directory_navigation",
+    src = "directory_navigation.cc",
 )
 
 cs_test(
-  name = "enum",
-  src = "enum.cc",
+    name = "enum",
+    src = "enum.cc",
 )
 
 cs_test(
-  name = "field",
-  src = "field.cc",
+    name = "field",
+    src = "field.cc",
 )
 
 cs_test(
-  name = "for_range",
-  src = "for_range.cc",
+    name = "for_range",
+    src = "for_range.cc",
 )
 
 cs_test(
-  name = "function",
-  src = "function.cc",
+    name = "function",
+    src = "function.cc",
 )
 
 cs_test(
-  name = "multiple_definitions",
-  src = "multiple_definitions.cc",
+    name = "multiple_definitions",
+    src = "multiple_definitions.cc",
 )
 
 cs_test(
-  name = "search",
-  src = "search.cc",
+    name = "search",
+    src = "search.cc",
 )
 
 cs_test(
-  name = "template_outline",
-  src = "template_outline.cc",
+    name = "template_outline",
+    src = "template_outline.cc",
 )
 
 cs_test(
-  name = "variable",
-  src = "variable.cc",
+    name = "variable",
+    src = "variable.cc",
 )

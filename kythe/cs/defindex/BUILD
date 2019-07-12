@@ -1,10 +1,10 @@
 package(default_visibility = ["//visibility:public"])
 
-load("//tools:build_rules/go.bzl", "go_package_library")
+load("//tools:build_rules/shims.bzl", "go_library")
 
 licenses(["notice"])
 
-go_package_library(
+go_library(
     name = "defindex",
     srcs = ["defindex.go"],
 )

@@ -50,7 +50,7 @@ import (
 	"github.com/google/codesearch/index"
 
 	"kythe.io/kythe/go/platform/delimited"
-	spb "kythe.io/kythe/proto/storage_proto"
+	spb "kythe.io/kythe/proto/storage_go_proto"
 
 	"kythe.io/kythe/cs/cshtml"
 	"kythe.io/kythe/cs/defindex"
