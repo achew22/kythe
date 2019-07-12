@@ -12,10 +12,19 @@ def kythe_rule_repositories():
 
     These repositories must be loaded before calling external.bzl%kythe_dependencies.
     """
+
+    skylib_version = "0.8.0"
     http_archive(
+        name = "bazel_skylib",
+        type = "tar.gz",
+        url = "https://github.com/bazelbuild/bazel-skylib/releases/download/{}/bazel-skylib.{}.tar.gz".format(skylib_version, skylib_version),
+        sha256 = "2ef429f5d7ce7111263289644d233707dba35e39696377ebab8b0bc701f7818e",
+    )
+
+    git_repository(
         name = "io_bazel_rules_go",
-        url = "https://github.com/bazelbuild/rules_go/releases/download/0.18.5/rules_go-0.18.5.tar.gz",
-        sha256 = "a82a352bffae6bee4e95f68a8d80a70e87f42c4741e6a448bec11998fcc82329",
+        remote = "https://github.com/bazelbuild/rules_go",
+        commit = "e2795c08da49e5806ebb52810f68782cfb8f3a6e",
     )
 
     maybe(
