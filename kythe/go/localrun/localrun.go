@@ -119,6 +119,7 @@ func (l Language) String() string {
 		"Jvm",
 		"Protobuf",
 		"Python",
+		"Textproto",
 		"TypeScript",
 	}[l]
 }

@@ -4,7 +4,10 @@ package(default_visibility = ["//kythe:default_visibility"])
 
 go_binary(
     name = "http_server",
-    srcs = ["http_server.go"],
+    srcs = [
+        "csearch.go",
+        "http_server.go",
+    ],
     deps = [
         "//kythe/go/services/filetree",
         "//kythe/go/services/graph",
@@ -17,6 +20,10 @@ go_binary(
         "//kythe/go/storage/leveldb",
         "//kythe/go/storage/table",
         "//kythe/go/util/flagutil",
+        "//kythe/proto:filetree_go_proto",
+        "//kythe/proto:xref_go_proto",
+        "@com_github_google_codesearch//index:go_default_library",
+        "@com_github_google_codesearch//regexp:go_default_library",
         "@org_golang_x_net//http2:go_default_library",
     ],
 )

@@ -267,7 +267,7 @@ def _java_dependencies():
             "https://repo1.maven.org/maven2",
         ],
         fetch_sources = True,
-        generate_compat_repositories = True, # Required by bazel-common's dependencies
+        generate_compat_repositories = True,  # Required by bazel-common's dependencies
         version_conflict_policy = "pinned",
     )
 
@@ -603,6 +603,14 @@ def _go_dependencies():
     )
 
     maybe(
+        go_repository,
+        name = "com_github_xi2_xz",
+        commit = "48954b6210f8d154cb5f8484d3a3e1f83489309e",
+        custom = "xi2xz",
+        importpath = "github.com/xi2/xz",
+    )
+
+    maybe(
         http_archive,
         name = "org_brotli_go",
         sha256 = "4c61bfb0faca87219ea587326c467b95acb25555b53d1a421ffa3c8a9296ee2c",
@@ -611,6 +619,13 @@ def _go_dependencies():
             "https://mirror.bazel.build/github.com/google/brotli/archive/v1.0.7.tar.gz",
             "https://github.com/google/brotli/archive/v1.0.7.tar.gz",
         ],
+    )
+
+    maybe(
+        go_repository,
+        name = "com_github_google_codesearch",
+        tag = "v1.1.0",
+        importpath = "github.com/google/codesearch",
     )
 
 def _bindings():

@@ -44,6 +44,8 @@ import (
 var (
 	servingTable = flag.String("serving_table", "", "LevelDB serving table")
 
+	codeSearchEnabled = flag.Bool("code_search", true, "Should the codesearch endpoints be included.")
+
 	httpListeningAddr = flag.String("listen", "localhost:8080", "Listening address for HTTP server (\":<port>\" allows access from any machine)")
 	httpAllowOrigin   = flag.String("http_allow_origin", "", "If set, each HTTP response will contain a Access-Control-Allow-Origin header with the given value")
 	publicResources   = flag.String("public_resources", "", "Path to directory of static resources to serve")
@@ -98,6 +100,12 @@ func main() {
 	}
 	tbl := &table.KVProto{db}
 	ft = &ftsrv.Table{Proto: tbl, PrefixedKeys: true}
+
+	if *codeSearchEnabled {
+		cs := newCodeSearch(ft, xs)
+		go cs.Index()
+		http.HandleFunc("/search", cs.Search)
+	}
 
 	if *httpListeningAddr != "" || *tlsListeningAddr != "" {
 		apiMux := http.NewServeMux()
